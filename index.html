@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Evaluación B787 ATA 22</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        aviation: {
+                            900: '#0b1329',
+                            800: '#111d3b',
+                            700: '#1a2c56',
+                            600: '#253d78',
+                            accent: '#3b82f6',
+                            cyan: '#06b6d4'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* WebKit and iOS Specific Compatibility Styles */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
+        }
+
+        /* Smooth scrolling container for iOS Safari */
+        .ios-scroll-fix {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Prevent zooming on input focus in iOS */
+        input[type="radio"] {
+            -webkit-appearance: radio;
+            appearance: radio;
+        }
+    </style>
+</head>
+<body class="bg-aviation-900 text-gray-100 min-h-screen flex flex-col justify-between selection:bg-aviation-accent selection:text-white ios-scroll-fix">
+
+    <!-- Header / Navbar -->
+    <header class="bg-aviation-800 border-b border-aviation-700 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-5xl mx-auto px-4 py-3 sm:py-4 flex flex-row justify-between items-center gap-2">
+            <div class="flex items-center space-x-2.5">
+                <div class="bg-aviation-cyan/20 p-2 rounded-xl border border-aviation-cyan/30 text-aviation-cyan flex-shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white leading-tight">Evaluación B787 ATA 22</h1>
+                    <p class="text-[10px] sm:text-xs text-gray-400">Autoflight System • 25 Preguntas</p>
+                </div>
+            </div>
+            <div id="timer-container" class="hidden items-center bg-aviation-700/60 px-2.5 py-1 rounded-lg border border-aviation-600 text-xs sm:text-sm font-mono text-aviation-cyan flex-shrink-0">
+                ⏱️ <span id="timer" class="ml-1 font-semibold">00:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-6 sm:py-8 w-full flex-grow">
+        
+        <!-- Welcome / Start View -->
+        <div id="welcome-view" class="bg-aviation-800/90 backdrop-blur-md rounded-2xl border border-aviation-700 p-6 sm:p-8 shadow-2xl text-center">
+            <div class="inline-flex p-4 bg-aviation-accent/10 rounded-full text-aviation-accent mb-4 border border-aviation-accent/20">
+                <svg class="w-10 h-10 sm:w-12 sm:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-3">Examen de Conocimientos - Sistemas de Aeronaves</h2>
+            <p class="text-gray-300 max-w-xl mx-auto text-xs sm:text-sm leading-relaxed mb-6">
+                Este cuestionario consta de 25 preguntas de opción múltiple configuradas con las respuestas correctas validadas para el sistema del Boeing 787. Optimizado para dispositivos iOS y táctiles.
+            </p>
+            <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all transform active:scale-95">
+                Comenzar Cuestionario
+            </button>
+        </div>
+
+        <!-- Quiz Container (Hidden initially) -->
+        <div id="quiz-container" class="hidden space-y-6">
+            <!-- Progress Bar -->
+            <div class="bg-aviation-800 border border-aviation-700 rounded-xl p-3.5 sm:p-4 flex items-center justify-between shadow-md">
+                <span class="text-[11px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Progreso</span>
+                <div class="flex items-center space-x-3 w-3/5 sm:w-1/2 max-w-xs">
+                    <div class="w-full bg-aviation-700 h-2 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-aviation-cyan h-full transition-all duration-300 w-0"></div>
+                    </div>
+                    <span id="progress-text" class="text-xs font-mono text-gray-300">0/25</span>
+                </div>
+            </div>
+
+            <!-- Questions List Form -->
+            <form id="quiz-form" class="space-y-6" onsubmit="submitQuiz(event)">
+                <div id="questions-list" class="space-y-6">
+                    <!-- Dynamic Questions injected here -->
+                </div>
+
+                <!-- Submit Button -->
+                <div id="submit-section" class="flex justify-center sm:justify-end pt-4 pb-12">
+                    <button type="submit" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-xl shadow-emerald-500/20 transition-all transform active:scale-95">
+                        Calificar Cuestionario Final
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Summary View (Hidden initially) -->
+        <div id="results-view" class="hidden bg-aviation-800 border border-aviation-700 rounded-2xl p-6 sm:p-8 shadow-2xl text-center space-y-6">
+            <div id="score-badge" class="inline-flex flex-col items-center justify-center p-6 rounded-2xl border w-full max-w-sm mx-auto">
+                <span class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Calificación Final</span>
+                <h3 id="score-text" class="text-5xl font-black mb-2">0/25</h3>
+                <p id="score-percentage" class="text-lg font-medium"></p>
+            </div>
+            
+            <p id="results-message" class="text-gray-300 text-sm max-w-md mx-auto"></p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+                <button onclick="resetQuiz()" class="w-full sm:w-auto px-6 py-3.5 bg-aviation-700 hover:bg-aviation-600 text-white font-medium rounded-xl border border-aviation-600 transition-all">
+                    Intentar Nuevamente
+                </button>
+                <button onclick="toggleReviewMode()" id="review-btn" class="w-full sm:w-auto px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl shadow-lg transition-all">
+                    Ver Desglose de Respuestas
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-aviation-800 border-t border-aviation-700 py-4 text-center text-xs text-gray-500">
+        Plataforma Interactiva de Capacitación Técnica Boeing 787 • ATA 22 Autoflight
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const questionsData = [
+            {
+                id: 1,
+                question: "Where is hosted the AFF software application?",
+                options: { A: "CCR L", B: "FCE", C: "CCR R", D: "CCN" },
+                correct: "B"
+            },
+            {
+                id: 2,
+                question: "The AFDS operates in these two modes:",
+                options: { A: "Autopilot · Flight director.", B: "Autopilot · Autothrottle", C: "Autothrottle · Autoland" },
+                correct: "A"
+            },
+            {
+                id: 3,
+                question: "The AFF operates when the PFCF is in the normal mode. The AFF does not operate when the PFCF is in the secondary or direct modes.",
+                options: { A: "True", B: "False" },
+                correct: "A"
+            },
+            {
+                id: 4,
+                question: "With Autothrottle Arm Switches in the UP position, the A/T automatically engages during any of these autoflight modes:",
+                options: { 
+                    A: "Lateral navigation (VNAV), • Flight level hold (FLHO), • Takeoff/go-around (TO/GA).", 
+                    B: "Vertical navigation (VNAV), • Flight level change (FLCH), • Takeoff/go-around (TO/GA).", 
+                    C: "Logitudinal navigation (VNAV), • IAS/MACH, • Takeoff/go-around (TO/GA)." 
+                },
+                correct: "B"
+            },
+            {
+                id: 5,
+                question: "A photo diode light sensor on the MCP front panel monitors ambient lighting. The MCP uses this data to control the brightness of the LCDs.",
+                options: { A: "True", B: "False" },
+                correct: "A"
+            },
+            {
+                id: 6,
+                question: "What kind of bus is used for communication between MCP and Flight Control Modules?",
+                options: { A: "CAN bus", B: "ARINC 629", C: "RS-485", D: "ARINC 429" },
+                correct: "D"
+            },
+            {
+                id: 7,
+                question: "Which of the following components provides input to the Autoflight Function (AFF)?",
+                options: { A: "APU controller", B: "Localizer and Glideslope", C: "Fuel Quantity Indicator", D: "Brake Temperature Sensor" },
+                correct: "B"
+            },
+            {
+                id: 8,
+                question: "Which module directly controls the movement of primary flight surfaces?",
+                options: { A: "FCM", B: "AFF", C: "ACE", D: "DCMF" },
+                correct: "C"
+            },
+            {
+                id: 9,
+                question: "How many Autopilot Engage Switches ther are om MCP?",
+                options: { 
+                    A: "There are four autopilot (A/P) engage pushbutton switches, 2 captain and 2 firstofficer (F/O). The label on the switches is A/P.", 
+                    B: "There are three autopilot (A/P) engage pushbutton switches, 2 captain and 1 firstofficer (F/O). The label on the switches is A/P.", 
+                    C: "There are two autopilot (A/P) engage pushbutton switches, captain and firstofficer (F/O). The label on the switches is A/P." 
+                },
+                correct: "C"
+            },
+            {
+                id: 10,
+                question: "The three BDA provides tactile feedback to the flight crew when a primaryflight control surface moves. These are the BDAs:",
+                options: { 
+                    A: "Spoiler column BDA, • Stabilizer BDA, • Steering pedal BDA.", 
+                    B: "Stabilizer BDA, • Flaps wheel BDA, • Rudder pedal BDA.", 
+                    C: "Control column BDA, • Control wheel BDA, • Rudder pedal BDA." 
+                },
+                correct: "C"
+            },
+            {
+                id: 11,
+                question: "During manual control, primary flight control function (PFCF) bank angle protection (BAP) engages the BDA for the control wheel and applies a torque to the control wheels in the direction opposite to the bank. This cues the pilot to move the wheel toward the wings-level position and protect the airplane from excessive bank angles.",
+                options: { A: "True", B: "False" },
+                correct: "A"
+            },
+            {
+                id: 12,
+                question: "During an approach, these autoland indications can show:",
+                options: { 
+                    A: "• LAND 3 (white), • LAND 2 (white with green diamonds), • NO AUTOLAND (red).", 
+                    B: "• LAND 3 (green), • LAND 2 (green with white diamonds), • NO AUTOLAND (amber).", 
+                    C: "• LAND 3 (green), • LAND 2 (amber with white diamonds), • NO AUTOLAND (green)." 
+                },
+                correct: "B"
+            },
+            {
+                id: 13,
+                question: "There are three procedures to disengage the A/P:",
+                options: { 
+                    A: "• Push the A/P disconnect switch on the Throtlle lever, • Pull Up the disengage bar on the MCP, • Manually override the A/P commands to the flight controls.", 
+                    B: "• Push the A/P disconnect switch on the MCP, • Pull down the disengage bar on the Rudder pedals, • Manually override the A/P commands to the flight controls.", 
+                    C: "• Push the A/P disconnect switch on the wheel, • Pull down the disengage bar on the MCP, • Manually override the A/P commands to the flight controls." 
+                },
+                correct: "C"
+            },
+            {
+                id: 14,
+                question: "When the CCR cabinets get the A/P disconnect, the display and crew alerting function (DCAF) causes these indications:",
+                options: { 
+                    A: "• Two red master warning lights, • An aural warning, • A warning message on EICAS.", 
+                    B: "• Two Amber master warning lights, • An aural warning, • A caution message on EICAS.", 
+                    C: "• Three red master warning lights, • An beeper warning, • A warning message on MCP." 
+                },
+                correct: "A"
+            },
+            {
+                id: 15,
+                question: "What is the role of the AFF backdrive function?",
+                options: { A: "Simulate manual inputs", B: "Control flaps", C: "Provide tactile and visual feedback", D: "Send thrust commands" },
+                correct: "C"
+            },
+            {
+                id: 16,
+                question: "VNAV can engage in one of three modes:",
+                options: { 
+                    A: "• VNAV SPD (altitude) – AFF commands the elevator to hold the target airspeed, • VNAV PTH (path) – AFF commands the elevator to hold FMF target Speed or the flight plan path, • VNAV ALT (altitude) – AFF commands the elevator to hold the MCP selected Speed when that altitude is lower than the VNAV commanded path in climb or higher than the VNAV commanded altitude in descent.", 
+                    B: "• VNAV SPD (speed) – AFF commands the elevator to hold the target airspeed, • VNAV PTH (path) – AFF commands the elevator to hold FMF target altitude or the flight plan path, • VNAV ALT (altitude) – AFF commands the elevator to hold the MCP selected altitude when that altitude is lower than the VNAV commanded altitude in climb or higher than the VNAV commanded altitude in descent.", 
+                    C: "• VNAV SPD (path) – AFF commands the elevator to hold the target airspeed, • VNAV PTH (path) – AFF commands the elevator to hold FMF target altitude or the flight plan speed, • VNAV ALT (altitude) – AFF commands the elevator to hold the MCP selected altitude when that altitude is lower than the VNAV commanded Speed in climb or higher than the VNAV commanded path in descent." 
+                },
+                correct: "C"
+            },
+            {
+                id: 17,
+                question: "These are the landing systems:",
+                options: { 
+                    A: "• Instrument landing system (ILS), • Global positioning system (GPS) landing system (GLS), • Integrated approach navigation (IAN).", 
+                    B: "• Microwave landing system (MLS), • Ground landing system (GLS), • Integrated approach navigation (IAN).", 
+                    C: "• Microwave landing system (mLS), • Marker Beacon System (MBS), • Integrated approach navigation (IAN)." 
+                },
+                correct: "A"
+            },
+            {
+                id: 18,
+                question: "The Thrust Management Function (TMF) is hosted in which avionics cabinet?",
+                options: { A: "FCE Left", B: "PCM", C: "CCR", D: "ACE" },
+                correct: "C"
+            },
+            {
+                id: 19,
+                question: "There are two copies of the TMF software. One copy is in the left CCR cabinet. One copy is in the right CCR cabinet. One copy is the master. The other copy is the hot spare. The master is the first valid TMF.",
+                options: { A: "True", B: "False" },
+                correct: "B"
+            },
+            {
+                id: 20,
+                question: "What is the primary function of the Autopilot Flight Director System (AFDS)?",
+                options: { 
+                    A: "Manage electrical load shedding", 
+                    B: "Control the airplane’s attitude and provide FD commands (Airway)", 
+                    C: "Balance fuel between tanks", 
+                    D: "Control cabin pressurization" 
+                },
+                correct: "B"
+            },
+            {
+                id: 21,
+                question: "During which flight phase is the 787 not certified to use the autopilot engaged?",
+                options: { A: "Climb", B: "Cruise", C: "Takeoff", D: "Approach" },
+                correct: "C"
+            },
+            {
+                id: 22,
+                question: "Which autoland capability is listed for the 787 AFDS?",
+                options: { A: "CAT I", B: "CAT II", C: "CAT IIIa", D: "CAT IIIb" },
+                correct: "D"
+            },
+            {
+                id: 23,
+                question: "The Autoflight Function (AFF) that computes pitch/roll/yaw commands resides in the:",
+                options: { A: "CCR", B: "DCAF", C: "FCE", D: "INR" },
+                correct: "C"
+            },
+            {
+                id: 24,
+                question: "How many channels are provided in each BDA interface from ACE C2?",
+                options: { A: "One", B: "Two (A and B)", C: "Three", D: "Four" },
+                correct: "B"
+            },
+            {
+                id: 25,
+                question: "Position feedback from flight deck controls to ACEs is provided by:",
+                options: { A: "RVDTs", B: "LVDTs", C: "Potentiometers", D: "Encoders" },
+                correct: "A"
+            }
+        ];
+
+        let timerInterval;
+        let secondsElapsed = 0;
+        let isSubmitted = false;
+
+        function startQuiz() {
+            document.getElementById('welcome-view').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('timer-container').classList.remove('hidden');
+            document.getElementById('timer-container').classList.add('flex');
+            
+            renderQuestions();
+            startTimer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function renderQuestions() {
+            const listContainer = document.getElementById('questions-list');
+            listContainer.innerHTML = '';
+
+            questionsData.forEach((q, index) => {
+                let optionsHtml = '';
+                for (const [key, value] of Object.entries(q.options)) {
+                    optionsHtml += `
+                        <label class="option-label-${q.id}-${key} flex items-start p-3.5 rounded-xl border border-aviation-700 bg-aviation-700/30 hover:bg-aviation-700/60 cursor-pointer transition-all">
+                            <input type="radio" name="q_${q.id}" value="${key}" onchange="updateProgress()" class="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 bg-aviation-900 flex-shrink-0">
+                            <span class="ml-3 text-xs sm:text-sm text-gray-200 select-none"><strong class="text-aviation-cyan mr-1">${key})</strong> ${value}</span>
+                        </label>
+                    `;
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-aviation-800 border border-aviation-700 rounded-2xl p-5 sm:p-6 shadow-md transition-all";
+                card.id = `question-card-${q.id}`;
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-3 gap-2">
+                        <span class="text-[11px] sm:text-xs font-bold px-2.5 py-1 bg-aviation-700 text-aviation-cyan rounded-lg border border-aviation-600">Pregunta ${index + 1} de 25</span>
+                        <div id="feedback-icon-${q.id}" class="hidden"></div>
+                    </div>
+                    <h3 class="text-sm sm:text-base font-semibold text-white mb-4 leading-snug">${q.question}</h3>
+                    <div class="space-y-2.5" id="options-group-${q.id}">
+                        ${optionsHtml}
+                    </div>
+                    <div id="explanation-${q.id}" class="hidden mt-3 text-xs p-3 rounded-lg border"></div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function updateProgress() {
+            if (isSubmitted) return;
+            let answeredCount = 0;
+            questionsData.forEach(q => {
+                const radios = document.querySelectorAll(`input[name="q_${q.id}"]:checked`);
+                if (radios.length > 0) answeredCount++;
+            });
+
+            const percent = (answeredCount / questionsData.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-text').innerText = `${answeredCount}/25`;
+        }
+
+        function submitQuiz(event) {
+            event.preventDefault();
+            clearInterval(timerInterval);
+            isSubmitted = true;
+
+            let score = 0;
+            questionsData.forEach(q => {
+                const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                const card = document.getElementById(`question-card-${q.id}`);
+                const feedbackIcon = document.getElementById(`feedback-icon-${q.id}`);
+                const explanationDiv = document.getElementById(`explanation-${q.id}`);
+                
+                // Disable inputs after submit
+                const radios = document.querySelectorAll(`input[name="q_${q.id}"]`);
+                radios.forEach(r => r.disabled = true);
+
+                feedbackIcon.classList.remove('hidden');
+
+                const userVal = selected ? selected.value : null;
+
+                if (userVal === q.correct) {
+                    score++;
+                    card.className = "bg-aviation-800 border border-emerald-500/50 bg-emerald-950/10 rounded-2xl p-5 sm:p-6 shadow-md transition-all";
+                    feedbackIcon.innerHTML = `<span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold">✓ Correcta</span>`;
+                    
+                    explanationDiv.classList.remove('hidden');
+                    explanationDiv.className = "mt-3 text-xs p-3 rounded-lg border border-emerald-500/30 bg-emerald-950/20 text-emerald-300";
+                    explanationDiv.innerHTML = `Tu respuesta: <strong>Opción ${userVal}</strong> (Correcta)`;
+                } else {
+                    card.className = "bg-aviation-800 border border-rose-500/50 bg-rose-950/10 rounded-2xl p-5 sm:p-6 shadow-md transition-all";
+                    const displayUserVal = userVal ? `Opción ${userVal}` : 'Ninguna';
+                    feedbackIcon.innerHTML = `<span class="px-2.5 py-1 bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-bold">✗ Incorrecta</span>`;
+                    
+                    explanationDiv.classList.remove('hidden');
+                    explanationDiv.className = "mt-3 text-xs p-3 rounded-lg border border-rose-500/30 bg-rose-950/20 text-rose-300";
+                    explanationDiv.innerHTML = `Tu selección: <strong>${displayUserVal}</strong> | Respuesta correcta: <strong class="text-emerald-400">Opción ${q.correct}</strong>`;
+                }
+            });
+
+            // Hide submit button since exam is completed
+            document.getElementById('submit-section').classList.add('hidden');
+
+            // Show results view
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+                document.getElementById('quiz-container').classList.add('hidden');
+                document.getElementById('results-view').classList.remove('hidden');
+                
+                const percentage = Math.round((score / 25) * 100);
+                document.getElementById('score-text').innerText = `${score} / 25`;
+                document.getElementById('score-percentage').innerText = `${percentage}% de Aciertos`;
+                
+                const badge = document.getElementById('score-badge');
+                const msg = document.getElementById('results-message');
+
+                if (percentage >= 80) {
+                    badge.className = "inline-flex flex-col items-center justify-center p-6 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 w-full max-w-sm mx-auto";
+                    document.getElementById('score-text').className = "text-5xl font-black mb-2 text-emerald-400";
+                    msg.innerText = "¡Excelente desempeño! Demuestras un dominio sólido de los sistemas ATA 22 del Boeing 787.";
+                } else if (percentage >= 60) {
+                    badge.className = "inline-flex flex-col items-center justify-center p-6 rounded-2xl border border-amber-500/40 bg-amber-500/10 w-full max-w-sm mx-auto";
+                    document.getElementById('score-text').className = "text-5xl font-black mb-2 text-amber-400";
+                    msg.innerText = "¡Aprobado! Has completado satisfactoriamente la evaluación ATA 22.";
+                } else {
+                    badge.className = "inline-flex flex-col items-center justify-center p-6 rounded-2xl border border-rose-500/40 bg-rose-500/10 w-full max-w-sm mx-auto";
+                    document.getElementById('score-text').className = "text-5xl font-black mb-2 text-rose-400";
+                    msg.innerText = "Se recomienda repasar la documentación técnica ATA 22 para mejorar la calificación.";
+                }
+            }, 300);
+        }
+
+        let isReviewing = false;
+        function toggleReviewMode() {
+            const resultsView = document.getElementById('results-view');
+            const quizContainer = document.getElementById('quiz-container');
+            const reviewBtn = document.getElementById('review-btn');
+
+            if (!isReviewing) {
+                // Switch to review view (show questions with answers highlighted)
+                resultsView.classList.add('hidden');
+                quizContainer.classList.remove('hidden');
+                reviewBtn.innerText = "Volver al Resumen de Calificación";
+                isReviewing = true;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                // Switch back to results view
+                quizContainer.classList.add('hidden');
+                resultsView.classList.remove('hidden');
+                reviewBtn.innerText = "Ver Desglose de Respuestas";
+                isReviewing = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function resetQuiz() {
+            secondsElapsed = 0;
+            isSubmitted = false;
+            isReviewing = false;
+            document.getElementById('review-btn').innerText = "Ver Desglose de Respuestas";
+            document.getElementById('submit-section').classList.remove('hidden');
+            document.getElementById('results-view').classList.add('hidden');
+            startQuiz();
+        }
+    </script>
+</body>
+</html>
